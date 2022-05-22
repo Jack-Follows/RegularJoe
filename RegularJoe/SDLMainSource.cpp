@@ -22,13 +22,13 @@ void Close();
 /* !v!v! Global Variables !v!v! */
 
 //The window we'll be rendering to
-SDL_Window* gWindow = NULL;
+SDL_Window* g_window = NULL;
 
 //The surface contained by the window
-SDL_Surface* gScreenSurface = NULL;
+SDL_Surface* g_screenSurface = NULL;
 
 //The image we will load and show on the screen
-SDL_Surface* gHelloWorld = NULL;
+SDL_Surface* g_helloWorld = NULL;
 
 int main(int argc, char* args[])
 {
@@ -46,14 +46,31 @@ int main(int argc, char* args[])
 		}
 		else
 		{
-			//Apply the image
-			SDL_BlitSurface(gHelloWorld, NULL, gScreenSurface, NULL);
-			
-			//Update the surface
-			SDL_UpdateWindowSurface(gWindow);
+			//Main loop flag
+			bool l_quit = false;
 
-			//Wait two seconds
-			SDL_Delay(2000);
+			//Event handler
+			SDL_Event e;
+
+			//While application is running
+			while (!l_quit)
+			{
+				//Handle events on queue
+				while (SDL_PollEvent(&e) != 0)
+				{
+					//User requests quit
+					if (e.type == SDL_QUIT)
+					{
+						l_quit = true;
+					}
+				}
+
+				//Apply the image
+				SDL_BlitSurface(g_helloWorld, NULL, g_screenSurface, NULL);
+
+				//Update the surface
+				SDL_UpdateWindowSurface(g_window);
+			}
 		}
 	}
 
@@ -78,8 +95,8 @@ bool Init()
 	else
 	{
 		//Create window
-		gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		if (gWindow == NULL)
+		g_window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		if (g_window == NULL)
 		{
 			std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError();
 			success = false;
@@ -87,7 +104,7 @@ bool Init()
 		else
 		{
 			//Get window surface
-			gScreenSurface = SDL_GetWindowSurface(gWindow);
+			g_screenSurface = SDL_GetWindowSurface(g_window);
 		}
 	}
 
@@ -100,8 +117,8 @@ bool LoadMedia()
 	bool success = true;
 
 	//Load splash image
-	gHelloWorld = SDL_LoadBMP("Assets/Textures/MenuScreen.bmp");
-	if (gHelloWorld == NULL)
+	g_helloWorld = SDL_LoadBMP("Assets/Textures/MenuScreen.bmp");
+	if (g_helloWorld == NULL)
 	{
 		std::cerr << "Unable to load image SDL Error: " << "Assets/Textures/MenuScreen.bmp" << SDL_GetError();
 		success = false;
@@ -113,12 +130,12 @@ bool LoadMedia()
 void Close()
 {
 	//Deallocate surface
-	SDL_FreeSurface(gHelloWorld);
-	gHelloWorld = NULL;
+	SDL_FreeSurface(g_helloWorld);
+	g_helloWorld = NULL;
 
 	//Destroy window
-	SDL_DestroyWindow(gWindow);
-	gWindow = NULL;
+	SDL_DestroyWindow(g_window);
+	g_window = NULL;
 
 	//Quit SDL subsystems
 	SDL_Quit();
