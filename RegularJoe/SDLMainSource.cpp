@@ -16,11 +16,7 @@ bool LoadMedia(); // Loads media
 void Close(); //Frees media and shuts down SDL
 SDL_Surface* LoadSurface(std::string path); //Loads individual image
 
-////Global Variables
-//SDL_Window* g_window = NULL; //The window we'll be rendering to
-//SDL_Surface* g_screenSurface = NULL; //The surface contained by the window
-//SDL_Surface* g_helloWorld = NULL; //The image we will load and show on the screen
-
+//Global Variables
 SDL_Window* g_window = NULL; //The window we'll be rendering to
 SDL_Surface* g_screenSurface = NULL; //The surface contained by the window
 SDL_Surface* g_keyPressSurfaces[KEY_PRESS_SURFACE_TOTAL]; //The images that correspond to a keypress
@@ -55,11 +51,11 @@ int main(int argc, char* args[])
 					{
 						l_quit = true;
 					}
-					//User presses a key
-					else if (e.type == SDL_KEYDOWN)
+					
+					else if (e.type == SDL_KEYDOWN) //User presses a key
 					{
-						//Select surfaces based on key press
-						switch (e.key.keysym.sym)
+						
+						switch (e.key.keysym.sym) //Select surfaces based on key press
 						{
 						case SDLK_UP:
 							g_currentSurface = g_keyPressSurfaces[KEY_PRESS_SURFACE_UP];
@@ -125,50 +121,49 @@ bool Init()
 
 bool LoadMedia()
 {
-	//Loading success flag
-	bool success = true;
+	bool l_success = true; //Loading success flag
 
-	//Load default surface
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] = LoadSurface("Assets/Textures/MenuScreen.bmp");
+	
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] = LoadSurface("Assets/Textures/MenuScreen.bmp"); //Load default surface
 	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] == NULL)
 	{
 		std::cerr << "Failed to load default image!\n";
-		success = false;
+		l_success = false;
 	}
 
-	//Load up surface
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_UP] = LoadSurface("Assets/Textures/Up.bmp");
+	
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_UP] = LoadSurface("Assets/Textures/Up.bmp"); //Load up surface
 	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_UP] == NULL)
 	{
 		std::cerr << "Failed to load up image!\n";
-		success = false;
+		l_success = false;
 	}
 
-	//Load down surface
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN] = LoadSurface("Assets/Textures/Down.bmp");
+	
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN] = LoadSurface("Assets/Textures/Down.bmp"); //Load down surface
 	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN] == NULL)
 	{
 		std::cerr << "Failed to load down image!\n";
-		success = false;
+		l_success = false;
 	}
 
-	//Load left surface
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT] = LoadSurface("Assets/Textures/Left.bmp");
+	
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT] = LoadSurface("Assets/Textures/Left.bmp"); //Load left surface
 	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT] == NULL)
 	{
 		std::cerr << "Failed to load left image!\n";
-		success = false;
+		l_success = false;
 	}
 
-	//Load right surface
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] = LoadSurface("Assets/Textures/Right.bmp");
+	
+	g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] = LoadSurface("Assets/Textures/Right.bmp"); //Load right surface
 	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] == NULL)
 	{
-	std::cerr << "Failed to load right image!\n";
-		success = false;
+		std::cerr << "Failed to load right image!\n";
+		l_success = false;
 	}
 
-	return success;
+	return l_success;
 }
 
 void Close()
@@ -184,12 +179,24 @@ void Close()
 
 SDL_Surface* LoadSurface(std::string path)
 {
-	//Load image at specified path
-	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
-	if (loadedSurface == NULL)
+	SDL_Surface* l_optimizedSurface = NULL; //The final optimized image
+	SDL_Surface* l_loadedSurface = SDL_LoadBMP(path.c_str()); //Load image at specified path
+
+	if (l_loadedSurface == NULL)
 	{
 		std::cerr << "Unable to load image SDL Error: " << path.c_str() << SDL_GetError();
 	}
+	else
+	{
+		l_optimizedSurface = SDL_ConvertSurface(l_loadedSurface, g_screenSurface->format, 0); //Convert surface to screen format
+		
+		if (l_optimizedSurface == NULL)
+		{
+			std::cerr << "Unable to optimize image SDL Error: " << path.c_str() << SDL_GetError();
+		}
 
-	return loadedSurface;
+		SDL_FreeSurface(l_loadedSurface); //Get rid of old loaded surface
+	}
+
+	return l_optimizedSurface;
 }
