@@ -16,13 +16,12 @@ and may not be redistributed without written permission.*/
 bool Init(); // Starts up SDL and creates window
 bool LoadMedia(); // Loads media
 void Close(); //Frees media and shuts down SDL
-SDL_Surface* LoadSurface(std::string path); //Loads individual image
+SDL_Texture* LoadTexture(std::string path); //Loads individual image
 
 //Global Variables
 SDL_Window* g_window = NULL; //The window we'll be rendering to
-SDL_Surface* g_screenSurface = NULL; //The surface contained by the window
-SDL_Surface* g_keyPressSurfaces[KEY_PRESS_SURFACE_TOTAL]; //The images that correspond to a keypress
-SDL_Surface* g_currentSurface = NULL; //Current displayed image
+SDL_Renderer* g_renderer = NULL; //The window renderer
+SDL_Texture* g_texture = NULL; //Current displayed texture
 
 int main(int argc, char* args[])
 {
@@ -39,11 +38,7 @@ int main(int argc, char* args[])
 		else
 		{
 			bool l_quit = false; //Main loop flag
-
 			SDL_Event l_event; //Event handler
-
-			
-			g_currentSurface = g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT]; //Set default current surface
 
 			while (!l_quit) //While application is running
 			{
@@ -53,38 +48,11 @@ int main(int argc, char* args[])
 					{
 						l_quit = true;
 					}
-					
-					else if (l_event.type == SDL_KEYDOWN) //User presses a key
-					{
-						
-						switch (l_event.key.keysym.sym) //Select surfaces based on key press
-						{
-						case SDLK_UP:
-							g_currentSurface = g_keyPressSurfaces[KEY_PRESS_SURFACE_UP];
-							break;
-
-						case SDLK_DOWN:
-							g_currentSurface = g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN];
-							break;
-
-						case SDLK_LEFT:
-							g_currentSurface = g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT];
-							break;
-
-						case SDLK_RIGHT:
-							g_currentSurface = g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT];
-							break;
-
-						default:
-							g_currentSurface = g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
-							break;
-						}
-					}
 				}
 
-				SDL_BlitSurface(g_currentSurface, NULL, g_screenSurface, NULL); //Apply the image
-
-				SDL_UpdateWindowSurface(g_window); //Update the surface
+				SDL_RenderClear(g_renderer); //Clears screen
+				SDL_RenderCopy(g_renderer, g_texture, NULL, NULL); //Render texture to screen
+				SDL_RenderPresent(g_renderer); //Updates the screen
 			}
 		}
 	}
@@ -114,17 +82,22 @@ bool Init()
 		}
 		else
 		{
-			//Initialize PNG loading
-			int l_imgFlags = IMG_INIT_PNG;
-			if (!(IMG_Init(l_imgFlags) & l_imgFlags))
+			g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
+			if (g_renderer == NULL)
 			{
-				std::cerr << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError();
+				std::cerr << "Renderer could not be created! SDL Error: " << SDL_GetError();
 				l_success = false;
 			}
 			else
 			{
-				//Get window surface
-				g_screenSurface = SDL_GetWindowSurface(g_window);
+				SDL_SetRenderDrawColor(g_renderer, 0xFF, 0xFF, 0xff, 0xFF); //Initialise Render Colour
+
+				int l_imgFlags = IMG_INIT_PNG; //Initialize PNG loading
+				if (!(IMG_Init(l_imgFlags) & l_imgFlags))
+				{
+					std::cerr << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError();
+					l_success = false;
+				}
 			}
 		}
 	}
@@ -136,53 +109,20 @@ bool LoadMedia()
 {
 	bool l_success = true; //Loading success flag
 
-	
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] = LoadSurface("Assets/Textures/MenuScreen.bmp"); //Load default surface
-	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] == NULL)
+	g_texture = LoadTexture("Assets/Textures/MenuScreen.bmp");
+	if (g_texture == NULL)
 	{
-		std::cerr << "Failed to load default image!\n";
-		l_success = false;
-	}
-
-	
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_UP] = LoadSurface("Assets/Textures/Up.bmp"); //Load up surface
-	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_UP] == NULL)
-	{
-		std::cerr << "Failed to load up image!\n";
-		l_success = false;
-	}
-
-	
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN] = LoadSurface("Assets/Textures/Down.bmp"); //Load down surface
-	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_DOWN] == NULL)
-	{
-		std::cerr << "Failed to load down image!\n";
-		l_success = false;
-	}
-
-	
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT] = LoadSurface("Assets/Textures/Left.bmp"); //Load left surface
-	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_LEFT] == NULL)
-	{
-		std::cerr << "Failed to load left image!\n";
-		l_success = false;
-	}
-
-	
-	g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] = LoadSurface("Assets/Textures/Right.bmp"); //Load right surface
-	if (g_keyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] == NULL)
-	{
-		std::cerr << "Failed to load right image!\n";
+		std::cerr << "Failed to load texture image!\n";
 		l_success = false;
 	}
 
 	return l_success;
 }
 
-SDL_Surface* LoadSurface(std::string path)
+SDL_Texture* LoadTexture(std::string path)
 {
-	SDL_Surface* l_optimizedSurface = NULL; //The final optimized image
-	SDL_Surface* l_loadedSurface = IMG_Load(path.c_str()); //Load image at specified path
+	SDL_Texture* l_newTexture = NULL; //The Final Texture
+	SDL_Surface* l_loadedSurface = IMG_Load(path.c_str());
 
 	if (l_loadedSurface == NULL)
 	{
@@ -190,9 +130,9 @@ SDL_Surface* LoadSurface(std::string path)
 	}
 	else
 	{
-		l_optimizedSurface = SDL_ConvertSurface(l_loadedSurface, g_screenSurface->format, 0); //Convert surface to screen format
-		
-		if (l_optimizedSurface == NULL)
+		//Create texture from surface pixels
+		l_newTexture = SDL_CreateTextureFromSurface(g_renderer, l_loadedSurface);
+		if (l_newTexture == NULL)
 		{
 			std::cerr << "Unable to optimize image SDL Error: " << path.c_str() << SDL_GetError();
 		}
@@ -200,16 +140,19 @@ SDL_Surface* LoadSurface(std::string path)
 		SDL_FreeSurface(l_loadedSurface); //Get rid of old loaded surface
 	}
 
-	return l_optimizedSurface;
+	return l_newTexture;
 }
 
 void Close()
 {
-	SDL_FreeSurface(g_currentSurface); //Deallocate surface
-	g_currentSurface = NULL;
+	SDL_DestroyTexture(g_texture);//Free loaded image
+	g_texture = NULL;
 
-	SDL_DestroyWindow(g_window); //Destroy window
+	SDL_DestroyRenderer(g_renderer); //Destroy window    
+	SDL_DestroyWindow(g_window);
 	g_window = NULL;
-
-	SDL_Quit(); //Quit SDL subsystems
+	g_renderer = NULL;
+	
+	IMG_Quit(); //Quit SDL subsystems
+	SDL_Quit();
 }
