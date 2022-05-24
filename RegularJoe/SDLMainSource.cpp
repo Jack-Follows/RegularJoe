@@ -23,10 +23,8 @@ SDL_Texture* LoadTexture(std::string path); //Loads individual image
 SDL_Window* g_window = NULL; //The window we'll be rendering to
 SDL_Renderer* g_renderer = NULL; //The window renderer
 SDL_Texture* g_texture = NULL; //Current displayed texture
-Texture* g_fooTexture;
-Texture* g_backgroundTexture;
 SDL_Rect g_spriteClips[4];
-Texture* g_spriteSheetTexture;
+Texture* g_modulatedTexture;
 
 int main(int argc, char* args[])
 {
@@ -45,6 +43,11 @@ int main(int argc, char* args[])
 			bool l_quit = false; //Main loop flag
 			SDL_Event l_event; //Event handler
 
+			//Modulation components
+			Uint8 l_red = 255;
+			Uint8 l_green = 255;
+			Uint8 l_blue = 255;
+
 			while (!l_quit) //While application is running
 			{
 				while (SDL_PollEvent(&l_event) != 0) //Handle events on queue
@@ -53,23 +56,51 @@ int main(int argc, char* args[])
 					{
 						l_quit = true;
 					}
+					//On keypress change rgb values
+					else if (l_event.type == SDL_KEYDOWN)
+					{
+						switch (l_event.key.keysym.sym)
+						{
+							//Increase red
+						case SDLK_q:
+							l_red += 32;
+							break;
+
+							//Increase green
+						case SDLK_w:
+							l_green += 32;
+							break;
+
+							//Increase blue
+						case SDLK_e:
+							l_blue += 32;
+							break;
+
+							//Decrease red
+						case SDLK_a:
+							l_red-= 32;
+							break;
+
+							//Decrease green
+						case SDLK_s:
+							l_green -= 32;
+							break;
+
+							//Decrease blue
+						case SDLK_d:
+							l_blue -= 32;
+							break;
+						}
+					}
 				}
 
 				//Clear screen
 				SDL_SetRenderDrawColor(g_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 				SDL_RenderClear(g_renderer);
 
-				//Render top left sprite
-				g_spriteSheetTexture->render(0, 0, &g_spriteClips[0]);
-
-				//Render top right sprite
-				g_spriteSheetTexture->render(SCREEN_WIDTH - g_spriteClips[1].w, 0, &g_spriteClips[1]);
-
-				//Render bottom left sprite
-				g_spriteSheetTexture->render(0, SCREEN_HEIGHT - g_spriteClips[2].h, &g_spriteClips[2]);
-
-				//Render bottom right sprite
-				g_spriteSheetTexture->render(SCREEN_WIDTH - g_spriteClips[3].w, SCREEN_HEIGHT - g_spriteClips[3].h, &g_spriteClips[3]);
+				//Modulate and render texture
+				g_modulatedTexture->SetColour(l_red, l_green, l_blue);
+				g_modulatedTexture->Render(0, 0);
 
 				//Update screen
 				SDL_RenderPresent(g_renderer);
@@ -133,15 +164,15 @@ bool Init()
 bool LoadMedia()
 {
 	//Loading success flag
-	bool success = true;
+	bool l_success = true;
 
-	g_spriteSheetTexture = new Texture(g_renderer);
+	g_modulatedTexture = new Texture(g_renderer);
 
 	//Load sprite sheet texture
-	if (!g_spriteSheetTexture->loadFromFile("Assets/Textures/Circle.png"))
+	if (!g_modulatedTexture->LoadFromFile("Assets/Textures/full.png"))
 	{
-		printf("Failed to load sprite sheet texture!\n");
-		success = false;
+		std::cerr << "\nFailed to load sprite sheet texture!\n";
+		l_success = false;
 	}
 	else
 	{
@@ -170,7 +201,7 @@ bool LoadMedia()
 		g_spriteClips[3].h = 100;
 	}
 
-	return success;
+	return l_success;
 }
 
 SDL_Texture* LoadTexture(std::string path)
