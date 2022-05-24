@@ -51,8 +51,51 @@ int main(int argc, char* args[])
 				}
 
 				SDL_RenderClear(g_renderer); //Clears screen
+<<<<<<< Updated upstream
 				SDL_RenderCopy(g_renderer, g_texture, NULL, NULL); //Render texture to screen
 				SDL_RenderPresent(g_renderer); //Updates the screen
+=======
+
+				//Top left corner viewport
+				SDL_Rect topLeftViewport;
+				topLeftViewport.x = 0;
+				topLeftViewport.y = 0;
+				topLeftViewport.w = SCREEN_WIDTH / 2;
+				topLeftViewport.h = SCREEN_HEIGHT / 2;
+				SDL_RenderSetViewport(g_renderer, &topLeftViewport);
+
+				//Render texture to screen
+				SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
+
+
+				//Top right viewport
+				SDL_Rect topRightViewport;
+				topRightViewport.x = SCREEN_WIDTH / 2;
+				topRightViewport.y = 0;
+				topRightViewport.w = SCREEN_WIDTH / 2;
+				topRightViewport.h = SCREEN_HEIGHT / 2;
+				SDL_RenderSetViewport(g_renderer, &topRightViewport);
+
+				//Render texture to screen
+				SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
+
+
+				//Bottom viewport
+				SDL_Rect bottomViewport;
+				bottomViewport.x = 0;
+				bottomViewport.y = SCREEN_HEIGHT / 2;
+				bottomViewport.w = SCREEN_WIDTH;
+				bottomViewport.h = SCREEN_HEIGHT / 2;
+				SDL_RenderSetViewport(g_renderer, &bottomViewport);
+
+
+				//Render texture to screen
+				SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
+
+
+				//Update screen
+				SDL_RenderPresent(g_renderer);
+>>>>>>> Stashed changes
 			}
 		}
 	}
@@ -109,7 +152,12 @@ bool LoadMedia()
 {
 	bool l_success = true; //Loading success flag
 
+<<<<<<< Updated upstream
 	g_texture = LoadTexture("Assets/Textures/MenuScreen.bmp");
+=======
+	//Load texture
+	g_texture = LoadTexture("Assets/Textures/Test.gif");
+>>>>>>> Stashed changes
 	if (g_texture == NULL)
 	{
 		std::cerr << "Failed to load texture image!\n";
