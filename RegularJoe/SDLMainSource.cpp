@@ -11,6 +11,7 @@ and may not be redistributed without written permission.*/
 //Header Includes
 #include "Constants.h"
 #include "Commons.h"
+#include "Texture.h"
 
 //Internal Function Declarations
 bool Init(); // Starts up SDL and creates window
@@ -22,6 +23,8 @@ SDL_Texture* LoadTexture(std::string path); //Loads individual image
 SDL_Window* g_window = NULL; //The window we'll be rendering to
 SDL_Renderer* g_renderer = NULL; //The window renderer
 SDL_Texture* g_texture = NULL; //Current displayed texture
+Texture* g_fooTexture;
+Texture* g_backgroundTexture;
 
 int main(int argc, char* args[])
 {
@@ -50,45 +53,15 @@ int main(int argc, char* args[])
 					}
 				}
 
+				//Clear screen
 				SDL_SetRenderDrawColor(g_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-				SDL_RenderClear(g_renderer); //Clears screen
+				SDL_RenderClear(g_renderer);
 
-				//Top left corner viewport
-				SDL_Rect topLeftViewport;
-				topLeftViewport.x = 0;
-				topLeftViewport.y = 0;
-				topLeftViewport.w = SCREEN_WIDTH / 2;
-				topLeftViewport.h = SCREEN_HEIGHT / 2;
-				SDL_RenderSetViewport(g_renderer, &topLeftViewport);
+				//Render background texture to screen
+				g_backgroundTexture->render(0, 0);
 
-				//Render texture to screen
-				SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
-
-
-				//Top right viewport
-				SDL_Rect topRightViewport;
-				topRightViewport.x = SCREEN_WIDTH / 2;
-				topRightViewport.y = 0;
-				topRightViewport.w = SCREEN_WIDTH / 2;
-				topRightViewport.h = SCREEN_HEIGHT / 2;
-				SDL_RenderSetViewport(g_renderer, &topRightViewport);
-
-				//Render texture to screen
-				SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
-
-
-				//Bottom viewport
-				SDL_Rect bottomViewport;
-				bottomViewport.x = 0;
-				bottomViewport.y = SCREEN_HEIGHT / 2;
-				bottomViewport.w = SCREEN_WIDTH;
-				bottomViewport.h = SCREEN_HEIGHT / 2;
-				SDL_RenderSetViewport(g_renderer, &bottomViewport);
-
-
-				//Render texture to screen
-				SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
-
+				//Render Foo' to the screen
+				g_fooTexture->render(240, 190);
 
 				//Update screen
 				SDL_RenderPresent(g_renderer);
@@ -151,13 +124,25 @@ bool Init()
 
 bool LoadMedia()
 {
-	bool l_success = true; //Loading success flag
+	//Loading success flag
+	bool l_success = true;
 
-	//Load texture
-	g_texture = LoadTexture("Assets/Textures/Test.gif");
-	if (g_texture == NULL)
+	g_fooTexture = new Texture();
+
+
+	//Load Foo' texture
+	if (!g_fooTexture->loadFromFile("Assets/Textures/Test.gif"))
 	{
-		std::cerr << "Failed to load texture image!\n";
+		std::cerr << "Failed to load Foo' texture image!\n";
+		l_success = false;
+	}
+
+	g_backgroundTexture = new Texture();
+
+	//Load background texture
+	if (!g_backgroundTexture->loadFromFile("Assets/Textures/MenuScreen.bmp"))
+	{
+		std::cerr << "Failed to load background texture image!\n";
 		l_success = false;
 	}
 
