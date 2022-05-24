@@ -8,24 +8,19 @@
 class Texture
 {
 public:
-	//Initializes variables
-	Texture(SDL_Renderer* renderer);
+	
+	Texture(SDL_Renderer* renderer);//Initializes variables
+	~Texture(); //Deallocates memory
 
-	//Deallocates memory
-	~Texture();
-
-	//Loads image at specified path
-	bool loadFromFile(std::string path);
-
-	//Deallocates texture
-	void free();
-
-	//Renders texture at given point
-	void render(int x, int y, SDL_Rect* clip = NULL);
+	
+	bool LoadFromFile(std::string path); //Loads image at specified path
+	void Free(); //Deallocates texture
+	void Render(int x, int y, SDL_Rect* clip = NULL); //Renders texture at given point
+	void SetColour(Uint8 red, Uint8 green, Uint8 blue); //Setting colours 
 
 	//Gets image dimensions
-	int getWidth();
-	int getHeight();
+	int GetWidth();
+	int GetHeight();
 
 private:
 	//The actual hardware texture
