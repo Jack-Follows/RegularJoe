@@ -4,7 +4,9 @@ and may not be redistributed without written permission.*/
 //System Inlcudes
 #include <SDL.h>
 #include <stdio.h>
+#include <SDL_image.h>
 #include <iostream>
+#include <string>
 
 //Header Includes
 #include "Constants.h"
@@ -38,24 +40,24 @@ int main(int argc, char* args[])
 		{
 			bool l_quit = false; //Main loop flag
 
-			SDL_Event e; //Event handler
+			SDL_Event l_event; //Event handler
 
 			
 			g_currentSurface = g_keyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT]; //Set default current surface
 
 			while (!l_quit) //While application is running
 			{
-				while (SDL_PollEvent(&e) != 0) //Handle events on queue
+				while (SDL_PollEvent(&l_event) != 0) //Handle events on queue
 				{
-					if (e.type == SDL_QUIT) //User requests quit
+					if (l_event.type == SDL_QUIT) //User requests quit
 					{
 						l_quit = true;
 					}
 					
-					else if (e.type == SDL_KEYDOWN) //User presses a key
+					else if (l_event.type == SDL_KEYDOWN) //User presses a key
 					{
 						
-						switch (e.key.keysym.sym) //Select surfaces based on key press
+						switch (l_event.key.keysym.sym) //Select surfaces based on key press
 						{
 						case SDLK_UP:
 							g_currentSurface = g_keyPressSurfaces[KEY_PRESS_SURFACE_UP];
@@ -95,12 +97,12 @@ int main(int argc, char* args[])
 
 bool Init()
 {
-	bool success = true; //Initialization check
+	bool l_success = true; //Initialization check
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) //Initialize SDL
 	{
 		std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError();
-		success = false;
+		l_success = false;
 	}
 	else
 	{
@@ -108,15 +110,26 @@ bool Init()
 		if (g_window == NULL)
 		{
 			std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError();
-			success = false;
+			l_success = false;
 		}
 		else
 		{
-			g_screenSurface = SDL_GetWindowSurface(g_window); //Get window surface
+			//Initialize PNG loading
+			int l_imgFlags = IMG_INIT_PNG;
+			if (!(IMG_Init(l_imgFlags) & l_imgFlags))
+			{
+				std::cerr << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError();
+				l_success = false;
+			}
+			else
+			{
+				//Get window surface
+				g_screenSurface = SDL_GetWindowSurface(g_window);
+			}
 		}
 	}
 
-	return success;
+	return l_success;
 }
 
 bool LoadMedia()
@@ -166,21 +179,10 @@ bool LoadMedia()
 	return l_success;
 }
 
-void Close()
-{
-	SDL_FreeSurface(g_currentSurface); //Deallocate surface
-	g_currentSurface = NULL;
-
-	SDL_DestroyWindow(g_window); //Destroy window
-	g_window = NULL;
-
-	SDL_Quit(); //Quit SDL subsystems
-}
-
 SDL_Surface* LoadSurface(std::string path)
 {
 	SDL_Surface* l_optimizedSurface = NULL; //The final optimized image
-	SDL_Surface* l_loadedSurface = SDL_LoadBMP(path.c_str()); //Load image at specified path
+	SDL_Surface* l_loadedSurface = IMG_Load(path.c_str()); //Load image at specified path
 
 	if (l_loadedSurface == NULL)
 	{
@@ -199,4 +201,15 @@ SDL_Surface* LoadSurface(std::string path)
 	}
 
 	return l_optimizedSurface;
+}
+
+void Close()
+{
+	SDL_FreeSurface(g_currentSurface); //Deallocate surface
+	g_currentSurface = NULL;
+
+	SDL_DestroyWindow(g_window); //Destroy window
+	g_window = NULL;
+
+	SDL_Quit(); //Quit SDL subsystems
 }
