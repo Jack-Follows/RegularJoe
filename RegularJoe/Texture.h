@@ -9,7 +9,7 @@ class Texture
 {
 public:
 	//Initializes variables
-	Texture();
+	Texture(SDL_Renderer* renderer);
 
 	//Deallocates memory
 	~Texture();
@@ -21,7 +21,7 @@ public:
 	void free();
 
 	//Renders texture at given point
-	void render(int x, int y);
+	void render(int x, int y, SDL_Rect* clip = NULL);
 
 	//Gets image dimensions
 	int getWidth();

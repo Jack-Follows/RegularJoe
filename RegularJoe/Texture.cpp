@@ -1,9 +1,9 @@
 #include "Texture.h"
 
-Texture::Texture()
+Texture::Texture(SDL_Renderer* renderer)
 {
 	//Initialize
-	m_renderer = NULL;
+	m_renderer = renderer;
 	m_texture = NULL;
 	m_width = 0;
 	m_height = 0;
@@ -68,11 +68,20 @@ void Texture::free()
 	}
 }
 
-void Texture::render(int x, int y)
+void Texture::render(int x, int y, SDL_Rect* clip)
 {
 	//Set rendering space and render to screen
 	SDL_Rect renderQuad = { x, y, m_width, m_height };
-	SDL_RenderCopy(m_renderer, m_texture, NULL, &renderQuad);
+
+	//Set clip rendering dimensions
+	if (clip != NULL)
+	{
+		renderQuad.w = clip->w;
+		renderQuad.h = clip->h;
+	}
+
+	//Render to screen
+	SDL_RenderCopy(m_renderer, m_texture, clip, &renderQuad);
 }
 
 int Texture::getWidth()

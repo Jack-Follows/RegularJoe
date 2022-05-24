@@ -25,6 +25,8 @@ SDL_Renderer* g_renderer = NULL; //The window renderer
 SDL_Texture* g_texture = NULL; //Current displayed texture
 Texture* g_fooTexture;
 Texture* g_backgroundTexture;
+SDL_Rect g_spriteClips[4];
+Texture* g_spriteSheetTexture;
 
 int main(int argc, char* args[])
 {
@@ -57,11 +59,17 @@ int main(int argc, char* args[])
 				SDL_SetRenderDrawColor(g_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 				SDL_RenderClear(g_renderer);
 
-				//Render background texture to screen
-				g_backgroundTexture->render(0, 0);
+				//Render top left sprite
+				g_spriteSheetTexture->render(0, 0, &g_spriteClips[0]);
 
-				//Render Foo' to the screen
-				g_fooTexture->render(240, 190);
+				//Render top right sprite
+				g_spriteSheetTexture->render(SCREEN_WIDTH - g_spriteClips[1].w, 0, &g_spriteClips[1]);
+
+				//Render bottom left sprite
+				g_spriteSheetTexture->render(0, SCREEN_HEIGHT - g_spriteClips[2].h, &g_spriteClips[2]);
+
+				//Render bottom right sprite
+				g_spriteSheetTexture->render(SCREEN_WIDTH - g_spriteClips[3].w, SCREEN_HEIGHT - g_spriteClips[3].h, &g_spriteClips[3]);
 
 				//Update screen
 				SDL_RenderPresent(g_renderer);
@@ -125,28 +133,44 @@ bool Init()
 bool LoadMedia()
 {
 	//Loading success flag
-	bool l_success = true;
+	bool success = true;
 
-	g_fooTexture = new Texture();
+	g_spriteSheetTexture = new Texture(g_renderer);
 
-
-	//Load Foo' texture
-	if (!g_fooTexture->loadFromFile("Assets/Textures/Test.gif"))
+	//Load sprite sheet texture
+	if (!g_spriteSheetTexture->loadFromFile("Assets/Textures/Circle.png"))
 	{
-		std::cerr << "Failed to load Foo' texture image!\n";
-		l_success = false;
+		printf("Failed to load sprite sheet texture!\n");
+		success = false;
+	}
+	else
+	{
+		//Set top left sprite
+		g_spriteClips[0].x = 0;
+		g_spriteClips[0].y = 0;
+		g_spriteClips[0].w = 100;
+		g_spriteClips[0].h = 100;
+						
+		//Set top right sprite
+		g_spriteClips[1].x = 100;
+		g_spriteClips[1].y = 0;
+		g_spriteClips[1].w = 100;
+		g_spriteClips[1].h = 100;
+						
+		//Set bottom left sprite
+		g_spriteClips[2].x = 0;
+		g_spriteClips[2].y = 100;
+		g_spriteClips[2].w = 100;
+		g_spriteClips[2].h = 100;
+						
+		//Set bottom right sprite
+		g_spriteClips[3].x = 100;
+		g_spriteClips[3].y = 100;
+		g_spriteClips[3].w = 100;
+		g_spriteClips[3].h = 100;
 	}
 
-	g_backgroundTexture = new Texture();
-
-	//Load background texture
-	if (!g_backgroundTexture->loadFromFile("Assets/Textures/MenuScreen.bmp"))
-	{
-		std::cerr << "Failed to load background texture image!\n";
-		l_success = false;
-	}
-
-	return l_success;
+	return success;
 }
 
 SDL_Texture* LoadTexture(std::string path)
