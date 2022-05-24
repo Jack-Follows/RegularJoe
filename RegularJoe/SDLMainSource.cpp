@@ -51,10 +51,7 @@ int main(int argc, char* args[])
 				}
 
 				SDL_RenderClear(g_renderer); //Clears screen
-<<<<<<< Updated upstream
 				SDL_RenderCopy(g_renderer, g_texture, NULL, NULL); //Render texture to screen
-				SDL_RenderPresent(g_renderer); //Updates the screen
-=======
 
 				//Top left corner viewport
 				SDL_Rect topLeftViewport;
@@ -95,7 +92,6 @@ int main(int argc, char* args[])
 
 				//Update screen
 				SDL_RenderPresent(g_renderer);
->>>>>>> Stashed changes
 			}
 		}
 	}
@@ -152,12 +148,8 @@ bool LoadMedia()
 {
 	bool l_success = true; //Loading success flag
 
-<<<<<<< Updated upstream
-	g_texture = LoadTexture("Assets/Textures/MenuScreen.bmp");
-=======
 	//Load texture
 	g_texture = LoadTexture("Assets/Textures/Test.gif");
->>>>>>> Stashed changes
 	if (g_texture == NULL)
 	{
 		std::cerr << "Failed to load texture image!\n";
