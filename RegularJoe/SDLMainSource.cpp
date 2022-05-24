@@ -50,8 +50,8 @@ int main(int argc, char* args[])
 					}
 				}
 
+				SDL_SetRenderDrawColor(g_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 				SDL_RenderClear(g_renderer); //Clears screen
-				SDL_RenderCopy(g_renderer, g_texture, NULL, NULL); //Render texture to screen
 
 				//Top left corner viewport
 				SDL_Rect topLeftViewport;
@@ -112,7 +112,12 @@ bool Init()
 		l_success = false;
 	}
 	else
-	{
+	{		
+		if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) //Set texture filtering to linear
+		{
+			std::cerr << "Warning: Linear texture filtering not enabled!\n";
+		}
+
 		g_window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN); //Create window
 		if (g_window == NULL)
 		{
@@ -185,14 +190,13 @@ SDL_Texture* LoadTexture(std::string path)
 
 void Close()
 {
-	SDL_DestroyTexture(g_texture);//Free loaded image
-	g_texture = NULL;
-
-	SDL_DestroyRenderer(g_renderer); //Destroy window    
+	//Destroy window	
+	SDL_DestroyRenderer(g_renderer);
 	SDL_DestroyWindow(g_window);
 	g_window = NULL;
 	g_renderer = NULL;
-	
-	IMG_Quit(); //Quit SDL subsystems
+
+	//Quit SDL subsystems
+	IMG_Quit();
 	SDL_Quit();
 }
