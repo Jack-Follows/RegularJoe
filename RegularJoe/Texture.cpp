@@ -68,23 +68,31 @@ void Texture::Free()
 
 void Texture::Render(int x, int y, SDL_Rect* clip)
 {
-	//Set rendering space and render to screen
-	SDL_Rect renderQuad = { x, y, m_width, m_height };
+	
+	SDL_Rect renderQuad = { x, y, m_width, m_height }; //Set rendering space and render to screen
 
-	//Set clip rendering dimensions
-	if (clip != NULL)
+	if (clip != NULL) //Set clip rendering dimensions
 	{
 		renderQuad.w = clip->w;
 		renderQuad.h = clip->h;
 	}
 
-	//Render to screen
-	SDL_RenderCopy(m_renderer, m_texture, clip, &renderQuad);
+	SDL_RenderCopy(m_renderer, m_texture, clip, &renderQuad); //Render to screen
 }
 
 void Texture::SetColour(Uint8 red, Uint8 green, Uint8 blue)
 {
 	SDL_SetTextureColorMod(m_texture, red, green, blue); //Modulate texture
+}
+
+void Texture::SetBlendMode(SDL_BlendMode blending)
+{
+	SDL_SetTextureBlendMode(m_texture, blending); //Set blending function
+}
+
+void Texture::SetAlpha(Uint8 alpha)
+{
+    SDL_SetTextureAlphaMod(m_texture, alpha); //Modulate texture alpha
 }
 
 int Texture::GetWidth()

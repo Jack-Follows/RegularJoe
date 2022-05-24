@@ -17,6 +17,8 @@ public:
 	void Free(); //Deallocates texture
 	void Render(int x, int y, SDL_Rect* clip = NULL); //Renders texture at given point
 	void SetColour(Uint8 red, Uint8 green, Uint8 blue); //Setting colours 
+	void SetBlendMode(SDL_BlendMode blending); //Set blending
+	void SetAlpha(Uint8 alpha); //Set alpha modulation
 
 	//Gets image dimensions
 	int GetWidth();
