@@ -153,6 +153,7 @@ bool LoadMedia()
 {
 	bool l_success = true; //Loading success flag
 
+	//Load texture
 	g_texture = LoadTexture("Assets/Textures/Test.gif");
 	if (g_texture == NULL)
 	{
